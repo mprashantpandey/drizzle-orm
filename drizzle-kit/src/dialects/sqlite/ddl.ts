@@ -193,6 +193,11 @@ export type ConflictIndex = {
 	name: string;
 };
 
+export type IndexNoName = {
+	type: 'index_no_name';
+	table: string;
+};
+
 export type ConflictFK = {
 	type: 'conflict_fk';
 	name: string;
@@ -220,6 +225,7 @@ export type SchemaError =
 	| ConflictUnique
 	| ConflictCheck
 	| ConflictIndex
+	| IndexNoName
 	| TableNoColumns;
 
 const count = <T>(arr: T[], predicate: (it: T) => boolean) => {
@@ -304,6 +310,10 @@ export const interimToDDL = (schema: InterimSchema): { ddl: SQLiteDDL; errors: S
 	}
 
 	for (const index of schema.indexes) {
+		if (typeof index.name !== 'string' || index.name === '') {
+			errors.push({ type: 'index_no_name', table: index.table });
+			continue;
+		}
 		const { status } = ddl.indexes.push(index, ['name']); // indexes have to have unique names across all schema
 		if (status === 'CONFLICT') {
 			errors.push({ type: 'conflict_index', name: index.name });

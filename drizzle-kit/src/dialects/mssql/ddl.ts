@@ -363,7 +363,7 @@ export type SchemaError = {
 	type: 'index_no_name';
 	schema: string;
 	table: string;
-	sql: string;
+	sql?: string;
 } | {
 	type: 'constraint_duplicate';
 	schema: string;
@@ -399,6 +399,15 @@ export const interimToDDL = (interim: InterimSchema): { ddl: MssqlDDL; errors: S
 	}
 
 	for (const index of interim.indexes) {
+		if (typeof index.name !== 'string' || index.name === '') {
+			errors.push({
+				type: 'index_no_name',
+				schema: index.schema,
+				table: index.table,
+			});
+			continue;
+		}
+
 		const res = ddl.indexes.push(index);
 
 		if (res.status === 'CONFLICT') {

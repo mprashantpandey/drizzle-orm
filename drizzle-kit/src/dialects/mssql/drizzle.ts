@@ -252,18 +252,13 @@ export const fromDrizzleSchema = (
 			const columns = index.config.columns;
 			const name = index.config.name;
 
-			for (const column of columns) {
-				// TODO index names are required, why this is here?
-				// potentially can be removed
-				if (is(column, SQL) && !index.config.name) {
-					errors.push({
-						type: 'index_no_name',
-						schema: schema,
-						table: getTableName(index.config.table),
-						sql: dialect.sqlToQuery(column).sql,
-					});
-					continue;
-				}
+			if (!name) {
+				errors.push({
+					type: 'index_no_name',
+					schema: schema,
+					table: tableName,
+				});
+				continue;
 			}
 
 			let where = index.config.where ? dialect.sqlToQuery(index.config.where, 'indexes').sql : '';

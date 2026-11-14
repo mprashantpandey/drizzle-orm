@@ -107,6 +107,11 @@ export const sqliteSchemaError = (error: SqliteSchemaError): string => {
 		return `'${error.name}' index name is a duplicate`;
 	}
 
+	if (error.type === 'index_no_name') {
+		const tableName = chalk.underline.blue(`'${error.table}'`);
+		return `Please specify an index name in ${tableName} table.`;
+	}
+
 	if (error.type === 'conflict_pk') {
 		return `'${error.name}' primary key name is a duplicate`;
 	}
@@ -1256,10 +1261,10 @@ export const mssqlSchemaError = (error: MssqlSchemaError): string => {
 	}
 
 	if (error.type === 'index_no_name') {
-		const { schema, table, sql } = error;
+		const { schema, table } = error;
 		const tableName = chalk.underline.blue(`"${schema}"."${table}"`);
 		return withStyle.errorWarning(
-			`Please specify an index name in ${tableName} table that has "${sql}" expression.\n\nWe can generate index names for indexes on columns only; for expressions in indexes, you need to specify index name yourself.`,
+			`Please specify an index name in ${tableName} table.`,
 		);
 	}
 
